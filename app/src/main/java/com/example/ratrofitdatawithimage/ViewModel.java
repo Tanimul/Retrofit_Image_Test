@@ -1,6 +1,7 @@
 package com.example.ratrofitdatawithimage;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -18,6 +19,7 @@ public class ViewModel extends AndroidViewModel {
     }
 
     LiveData<Response> uploadItemImage(File file , String modelUploadInfo, ProgressRequestBody progressRequestBody){
+        Log.d("viewmodel", modelUploadInfo+"uploadItemImage: "+file);
         return  repository.uploadItemImage(file,modelUploadInfo,progressRequestBody);
     }
 

@@ -9,6 +9,6 @@ import retrofit2.http.Part;
 
 public interface ApiInterface {
     @Multipart
-    @POST("uploadImage.php")
+    @POST("uploadItemImage.php")
     Observable<Response> uploadImage(@Part("info") RequestBody description, @Part MultipartBody.Part file);
 }

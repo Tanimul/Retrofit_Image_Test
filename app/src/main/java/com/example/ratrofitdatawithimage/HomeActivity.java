@@ -3,11 +3,15 @@ package com.example.ratrofitdatawithimage;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -18,6 +22,8 @@ import com.example.ratrofitdatawithimage.databinding.ActivityHomeBinding;
 
 import java.io.File;
 
+import io.reactivex.annotations.NonNull;
+
 public class HomeActivity extends AppCompatActivity implements ImageUploadCallbacks {
     private String TAG = "HomeActivity";
     private ActivityHomeBinding binding;
@@ -25,6 +31,7 @@ public class HomeActivity extends AppCompatActivity implements ImageUploadCallba
     Uri uriphoto;
     ViewModel viewModel;
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,7 +42,10 @@ public class HomeActivity extends AppCompatActivity implements ImageUploadCallba
         binding.btSelectImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mGetContent.launch("image/*");
+                if(requestStoragePermission()){
+                    mGetContent.launch("image/*");
+                }
+
             }
         });
         binding.btInsert.setOnClickListener(new View.OnClickListener() {
@@ -44,7 +54,6 @@ public class HomeActivity extends AppCompatActivity implements ImageUploadCallba
                 uploadPhoto(filePhoto);
             }
         });
-
     }
 
     ActivityResultLauncher<String> mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
@@ -55,7 +64,8 @@ public class HomeActivity extends AppCompatActivity implements ImageUploadCallba
 //                            .load(uri)
 //                            .centerCrop()
 //                            .into(binding.ivImage);
-                    filePhoto=new File(uri.getPath());;
+                    filePhoto = new File(uri.getPath());
+                    ;
                     uriphoto = uri;
                     binding.ivImage.setImageURI(uri);
                 }
@@ -68,6 +78,7 @@ public class HomeActivity extends AppCompatActivity implements ImageUploadCallba
                     .observe(this, new Observer<Response>() {
                         @Override
                         public void onChanged(Response modelUploadResponse) {
+                            Log.d(TAG, "onChanged: " + modelUploadResponse);
                             if (modelUploadResponse == null) {
                                 Toast.makeText(HomeActivity.this, "Photo Upload Failed!!", Toast.LENGTH_SHORT).show();
                             } else if (modelUploadResponse.getSuccess().equals("Uploaded successfully")) {
@@ -94,4 +105,32 @@ public class HomeActivity extends AppCompatActivity implements ImageUploadCallba
     public void onFinish() {
         Log.d(TAG, "onFinish: called");
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private boolean requestStoragePermission() {
+        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED &&
+                checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "requestStoragePermission: sob permission ase");
+            return true;
+        } else {
+            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 10);
+            return false;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Log.d(TAG, "onRequestPermissionsResult: permissions size=" + permissions.length + "grand results size:" + grantResults.length);
+        if (requestCode == 10) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "onRequestPermissionsResult: permission granted.");
+            } else {
+                Toast.makeText(HomeActivity.this, "Permission Denied", Toast.LENGTH_SHORT).show();
+
+            }
+        } else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
 }

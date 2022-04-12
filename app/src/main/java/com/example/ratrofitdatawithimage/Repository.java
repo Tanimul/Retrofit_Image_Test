@@ -29,12 +29,10 @@ public class Repository {
         final MutableLiveData<Response> response=new MutableLiveData<>();
 
         MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(),progressRequestBody);
-
         Gson gson = new Gson();
         String patientData = gson.toJson(test);
 
         RequestBody description = RequestBody.create(okhttp3.MultipartBody.FORM, patientData);
-
         Log.d(TAG, "imageUpload: repo called");
         apiInterface.uploadImage(description,body).subscribeOn(Schedulers.io())
                 //.timeout(120000, TimeUnit.MILLISECONDS)
@@ -42,12 +40,13 @@ public class Repository {
                 .subscribe(new Consumer<Response>() {
                     @Override
                     public void accept(Response modelUploadResponse) throws Exception {
+                        Log.d(TAG, "accept: "+modelUploadResponse);
                         response.postValue(modelUploadResponse);
                     }
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
-                        Log.d(TAG, "imageUpload: error:"+throwable.getMessage());
+                        Log.d(TAG, "imageUpload: error:"+throwable.getLocalizedMessage());
                         response.postValue(null);
                     }
                 });
