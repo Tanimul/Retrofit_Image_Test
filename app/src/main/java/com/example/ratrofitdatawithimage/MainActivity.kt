@@ -26,7 +26,6 @@ class MainActivity : AppCompatActivity() {
 
         binding.btInsert.setOnClickListener {
 
-
         }
     }
 
