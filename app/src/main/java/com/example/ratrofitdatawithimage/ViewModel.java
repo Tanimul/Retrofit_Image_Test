@@ -18,7 +18,7 @@ public class ViewModel extends AndroidViewModel {
         }
     }
 
-    LiveData<Response> uploadItemImage(File file , String modelUploadInfo, ProgressRequestBody progressRequestBody){
+    LiveData<Response> uploadItemImage(File file , ModelUploadInfo modelUploadInfo , ProgressRequestBody progressRequestBody){
         Log.d("viewmodel", modelUploadInfo+"uploadItemImage: "+file);
         return  repository.uploadItemImage(file,modelUploadInfo,progressRequestBody);
     }

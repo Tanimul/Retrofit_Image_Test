@@ -9,6 +9,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -30,6 +31,7 @@ public class HomeActivity extends AppCompatActivity implements ImageUploadCallba
     File filePhoto;
     Uri uriphoto;
     ViewModel viewModel;
+    String path;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
@@ -42,7 +44,7 @@ public class HomeActivity extends AppCompatActivity implements ImageUploadCallba
         binding.btSelectImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(requestStoragePermission()){
+                if (requestStoragePermission()) {
                     mGetContent.launch("image/*");
                 }
 
@@ -64,8 +66,11 @@ public class HomeActivity extends AppCompatActivity implements ImageUploadCallba
 //                            .load(uri)
 //                            .centerCrop()
 //                            .into(binding.ivImage);
-                    filePhoto = new File(uri.getPath());
-                    ;
+                    Context context = HomeActivity.this;
+                    path = RealPathUtil.getRealPath(context, uri);
+
+                    filePhoto = new File(path);
+
                     uriphoto = uri;
                     binding.ivImage.setImageURI(uri);
                 }
@@ -74,14 +79,15 @@ public class HomeActivity extends AppCompatActivity implements ImageUploadCallba
     private void uploadPhoto(File file) {
         if (file != null) {
             ProgressRequestBody progressRequestBody = new ProgressRequestBody(file, "image", HomeActivity.this);
-            viewModel.uploadItemImage(file, "Test", progressRequestBody)
+            Log.d(TAG, "uploadPhoto: " + file);
+            viewModel.uploadItemImage(file, new ModelUploadInfo("ok"), progressRequestBody)
                     .observe(this, new Observer<Response>() {
                         @Override
                         public void onChanged(Response modelUploadResponse) {
                             Log.d(TAG, "onChanged: " + modelUploadResponse);
-                            if (modelUploadResponse == null) {
+                            if (modelUploadResponse.getResponse() == 0) {
                                 Toast.makeText(HomeActivity.this, "Photo Upload Failed!!", Toast.LENGTH_SHORT).show();
-                            } else if (modelUploadResponse.getSuccess().equals("Uploaded successfully")) {
+                            } else if (modelUploadResponse.getResponse()==1) {
                                 Toast.makeText(HomeActivity.this, "Photo Upload Successfully!!", Toast.LENGTH_SHORT).show();
                             }
                         }
@@ -89,6 +95,7 @@ public class HomeActivity extends AppCompatActivity implements ImageUploadCallba
         } else {
             Toast.makeText(this, "Select Photo First", Toast.LENGTH_SHORT).show();
         }
+
     }
 
     @Override

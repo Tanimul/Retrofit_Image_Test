@@ -25,16 +25,18 @@ public class Repository {
 
     }
 
-    public LiveData<Response> uploadItemImage(File file ,String test, ProgressRequestBody progressRequestBody){
+    public LiveData<Response> uploadItemImage(File file , ModelUploadInfo modelUploadInfo, ProgressRequestBody progressRequestBody){
         final MutableLiveData<Response> response=new MutableLiveData<>();
-
+        Log.d(TAG, "uploadItemImage: "+file);
+        Log.d(TAG, "uploadItemImage: "+modelUploadInfo);
+        Log.d(TAG, "uploadItemImage: "+progressRequestBody);
         MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(),progressRequestBody);
         Gson gson = new Gson();
-        String patientData = gson.toJson(test);
+        String patientData = gson.toJson(modelUploadInfo);
 
         RequestBody description = RequestBody.create(okhttp3.MultipartBody.FORM, patientData);
         Log.d(TAG, "imageUpload: repo called");
-        apiInterface.uploadImage(description,body).subscribeOn(Schedulers.io())
+        apiInterface.uploadImage(body,description).subscribeOn(Schedulers.io())
                 //.timeout(120000, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Response>() {
